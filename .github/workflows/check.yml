@@ -9,13 +9,14 @@ on:
 jobs:
   update:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
         include:
-          - model: "SM-G998B"
-            region: "AUT"
+          - model: "SM-G988B"
+            region: "DBT"
 
     steps:
       - name: Checkout repo
@@ -34,12 +35,10 @@ jobs:
           echo "latest_version=$latest" >> $GITHUB_ENV
           echo "latest_shortversion=$latest_short" >> $GITHUB_ENV
           echo "need_update=$need_update" >> $GITHUB_ENV
-
       - name: Print available space
         if: env.need_update == 1
         run: |
           sudo df -h
-
       - name: Install dependencies
         if: env.need_update == 1
         run: |
@@ -54,7 +53,6 @@ jobs:
           sudo wget -O /usr/bin/extract-ikconfig https://corsica.nu/extract-ikconfig && sudo chmod +x /usr/bin/extract-ikconfig
           sudo wget -O /usr/bin/omc-decoder.jar http://corsica.nu/omc-decoder.jar && sudo chmod +x /usr/bin/omc-decoder.jar
           
-
       - name: Fetch firmware
         if: env.need_update == 1
         run: samfirm -m ${{ matrix.model }} -r ${{ matrix.region }}
@@ -121,13 +119,11 @@ jobs:
           for file in $releasedir/*.prop; do for prop in ${props[@]}; do echo $(grep $prop $file) >> version.txt; sed -i ':a;N;$!ba;s/\n\n/\n/g' version.txt; done; done
           sudo umount system && sudo umount vendor && rm -rf *img
           echo "folder=$releasedir" >> $GITHUB_ENV
-
       - name: Generate commit tag
         id: tag
         run: |
           name=$(date +'%Y%m%d%H%M%S')
           echo "name=$name" >> $GITHUB_ENV
-
       - name: Update current version
         if: env.need_update == 1
         run: |
@@ -138,7 +134,6 @@ jobs:
           git add current.${{ matrix.model }}_${{ matrix.region }}
           git commit -m "${{ matrix.model }}: ${{ env.latest_version }}"
           git tag ${{ env.name }}
-
       - name: Push changes to repo
         if: env.need_update == 1
         uses: ad-m/github-push-action@master
@@ -148,9 +143,9 @@ jobs:
 
       - name: Upload release assets
         if: env.need_update == 1
-        uses: CaptainThrowback/action-gh-release@master
+        uses: softprops/action-gh-release@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           body_path: version.txt
           tag_name: ${{ env.name }}
@@ -165,4 +160,3 @@ jobs:
             ${{ env.folder }}/${{ env.latest_shortversion }}-vendor.zip
             ${{ env.folder }}/${{ env.latest_shortversion }}-bootrecovery.zip
             ${{ env.folder }}/${{ env.latest_shortversion }}-csc.zip
-
