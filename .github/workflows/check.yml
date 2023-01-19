@@ -150,7 +150,7 @@ jobs:
         if: env.need_update == 1
         uses: CaptainThrowback/action-gh-release@master
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           body_path: version.txt
           tag_name: ${{ env.name }}
