@@ -15,7 +15,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - model: "SM-G980F"
+            region: "DBT"
+          - model: "SM-G981B"
+            region: "DBT"
+          - model: "SM-G985F"
+            region: "DBT"
+          - model: "SM-G986B"
+            region: "DBT"
           - model: "SM-G988B"
+            region: "DBT"
+          - model: "SM-G991B"
+            region: "DBT"
+          - model: "SM-G996B"
+            region: "DBT"
+          - model: "SM-G998B"
             region: "DBT"
 
     steps:
